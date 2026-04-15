@@ -1,6 +1,6 @@
 package com.locatehub.demo.model;
 
-public class Produto {
+public abstract class Produto {
     private String nome;
     private Double valor;
 
