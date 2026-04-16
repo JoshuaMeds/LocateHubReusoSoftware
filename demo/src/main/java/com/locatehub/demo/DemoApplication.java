@@ -8,17 +8,16 @@ import com.locatehub.demo.dashboard.DashboardFinanceiroTemplate;
 import com.locatehub.demo.dashboard.DashboardLocador;
 import com.locatehub.demo.dashboard.DashboardLocatario;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 
 		DashboardFinanceiroTemplate painelLocatario = new DashboardLocatario();
-		painelLocatario.gerarDashboard(); // Gera a tela de despesas
-
+		painelLocatario.gerarDashboard();
+		System.out.println("\n-----------------------------------\n");
 		DashboardFinanceiroTemplate painelLocador = new DashboardLocador();
-		painelLocador.gerarDashboard(); // Gera a tela de ganhos
+		painelLocador.gerarDashboard();
 	}
-
 }
