@@ -2,6 +2,7 @@ package com.locatehub.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 
 import com.locatehub.demo.dashboard.DashboardFinanceiroTemplate;
 import com.locatehub.demo.dashboard.DashboardLocador;
