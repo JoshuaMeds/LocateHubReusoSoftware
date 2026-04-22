@@ -2,12 +2,12 @@ package com.locatehub.demo.model;
 
 import java.math.BigDecimal;
 
-public class Item extends Bem {
+public class AtivoItem extends Ativo {
 
     private boolean caucao;
     private BigDecimal valorCaucao;
 
-    public Item(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao) {
+    public AtivoItem(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao) {
         super(id, titulo, diaria);
         this.caucao = caucao;
         this.valorCaucao = valorCaucao;
