@@ -24,8 +24,12 @@ public abstract class Ativo {
     }
 
     public BigDecimal calcularValorLocacao(int dias) {
-        if (!disponivel) throw new IllegalStateException("Indisponível");
-        if (dias <= 0) throw new IllegalArgumentException("Dias inválidos");
+        if (!disponivel) {
+            throw new IllegalStateException("Indisponivel");
+        }
+        if (dias <= 0) {
+            throw new IllegalArgumentException("Dias invalidos");
+        }
 
         BigDecimal base = valorDiaria.multiply(BigDecimal.valueOf(dias));
         return base.add(calcularAdicional(dias)).subtract(calcularDesconto(dias, base));
