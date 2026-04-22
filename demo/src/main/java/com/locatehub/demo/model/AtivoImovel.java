@@ -2,11 +2,11 @@ package com.locatehub.demo.model;
 
 import java.math.BigDecimal;
 
-public class Imovel extends Bem {
+public class AtivoImovel extends Ativo {
 
     private BigDecimal taxaLimpeza;
 
-    public Imovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza) {
+    public AtivoImovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza) {
         super(id, titulo, diaria);
         this.taxaLimpeza = taxaLimpeza;
     }
