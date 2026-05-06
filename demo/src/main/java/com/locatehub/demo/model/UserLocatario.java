@@ -1,12 +1,14 @@
 package com.locatehub.demo.model;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class UserLocatario extends User {
     // Atributos específicos
     private String formaPagamentoPrincipal;
     private int totalAlugueisRealizados;
 
-    public UserLocatario(String id, String nome, String email) {
-        super(id, nome, email);
+    public UserLocatario() {
     }
 
     // Implementação obrigatória do passo do Template Method
