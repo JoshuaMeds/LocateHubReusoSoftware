@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+<h2>Home Page</h2>
+
+```
+<p id="welcome"></p>
+
+<button onclick="logout()">Logout</button>
+
+<script>
+    async function checkSession() {
+    const response = await fetch("/session", {
+        method: "GET",
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        window.location.href = "index.html";
+    }
+}
+
+    async function logout() {
+        await fetch("/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+
+        window.location.href = "/";
+    }
+
+    checkSession()
+
+</script>
+```
+
+</body>
+</html>

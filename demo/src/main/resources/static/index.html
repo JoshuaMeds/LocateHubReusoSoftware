@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+<h2>Login</h2>
+
+```
+<form id="loginForm">
+    <label>Email:</label><br>
+    <input type="text" id="email" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" id="password" required><br><br>
+
+    <button type="submit">Login</button>
+</form>
+
+<p id="message"></p>
+
+<script>
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        console.log(email);
+
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    email: email,
+                    senha: password
+                })
+            });
+
+            const text = await response.text();
+            message.innerText = text;
+
+            if (response.ok) {
+                window.location.href = "home.html";
+            }
+
+        } catch (err) {
+            message.innerText = "Error connecting to server";
+        }
+    });
+</script>
+```
+
+</body>
+</html>
