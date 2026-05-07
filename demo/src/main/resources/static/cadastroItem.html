@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anunciar Item - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-main" style="max-width: 500px;">
+        <div class="card">
+            <div class="page-header">
+                <h1>Anunciar Novo Item</h1>
+                <p>Preencha os detalhes para disponibilizar para aluguel</p>
+            </div>
+
+            <form id="itemForm">
+                <div class="form-group">
+                    <label>Título do Anúncio:</label>
+                    <input type="text" id="nomeItem" placeholder="Ex: Apartamento, Carro ou Livro" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria:</label>
+                    <select id="categoriaItem" required>
+                        <option value="" disabled selected>Selecione uma categoria</option>
+                        <option value="IMOVEL">Imóvel</option>
+                        <option value="AUTOMOVEL">Automóvel</option>
+                        <option value="ITEM">Item</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Descrição Detalhada:</label>
+                    <textarea id="descricaoItem" placeholder="Descreva o item..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Valor do Aluguel:</label>
+                    <div class="input-group-price">
+                        <span>R$</span>
+                        <input type="number" id="precoItem" step="0.01" placeholder="0,00" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="saveItemBtn">Publicar Anúncio</button>
+                <button type="button" onclick="window.location.href='home.html'" class="btn btn-secondary">Cancelar</button>
+            </form>
+
+            <p id="message" class="alert" style="display:none;"></p>
+        </div>
+    </div>
+
+    <script>
+        const itemForm = document.getElementById("itemForm");
+        const message = document.getElementById("message");
+        const btn = document.getElementById("saveItemBtn");
+
+        itemForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            btn.classList.add("loading");
+            btn.innerText = "Enviando...";
+            message.style.display = "none";
+
+            const payload = {
+                nome: document.getElementById("nomeItem").value,
+                categoria: document.getElementById("categoriaItem").value,
+                descricao: document.getElementById("descricaoItem").value,
+                preco: parseFloat(document.getElementById("precoItem").value)
+            };
+
+            try {
+                const response = await fetch("/itens", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    message.innerText = "Item cadastrado com sucesso!";
+                    message.className = "alert alert-success";
+                    message.style.display = "block";
+                    itemForm.reset();
+                } else {
+                    const errorMsg = await response.text();
+                    message.innerText = "Erro: " + errorMsg;
+                    message.className = "alert alert-error";
+                    message.style.display = "block";
+                }
+            } catch (err) {
+                message.innerText = "Erro ao conectar.";
+                message.className = "alert alert-error";
+                message.style.display = "block";
+            } finally {
+                btn.classList.remove("loading");
+                btn.innerText = "Publicar Anúncio";
+            }
+        });
+    </script>
+</body>
+</html>

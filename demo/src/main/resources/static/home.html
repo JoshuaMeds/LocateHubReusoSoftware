@@ -1,43 +1,54 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h2>Home Page</h2>
+    <div class="container-main">
+        <div class="card">
+            <div class="page-header">
+                <h1>Página Inicial</h1>
+                <p id="welcome">Carregando...</p>
+            </div>
 
-```
-<p id="welcome"></p>
+            <div class="alert alert-success">
+                Sessão verificada com sucesso.
+            </div>
 
-<button onclick="logout()">Logout</button>
+            <button onclick="logout()" class="btn btn-secondary" style="margin-top: 20px;">
+                Sair da Conta
+            </button>
+        </div>
+    </div>
 
-<script>
-    async function checkSession() {
-    const response = await fetch("/session", {
-        method: "GET",
-        credentials: "include"
-    });
+    <script>
+        async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
 
-    if (!response.ok) {
-        window.location.href = "index.html";
-    }
-}
+            if (!response.ok) {
+                window.location.href = "index.html";
+            } else {
+                // Opcional: define um texto padrão se a sessão estiver ok
+                document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+            }
+        }
 
-    async function logout() {
-        await fetch("/logout", {
-            method: "POST",
-            credentials: "include"
-        });
+        async function logout() {
+            await fetch("/logout", {
+                method: "POST",
+                credentials: "include"
+            });
 
-        window.location.href = "/";
-    }
+            window.location.href = "/";
+        }
 
-    checkSession()
-
-</script>
-```
-
+        checkSession();
+    </script>
 </body>
 </html>

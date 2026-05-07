@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-main">
+        <div class="card">
+            <div class="page-header">
+                <h1>Criar Conta</h1>
+                <p>Escolha como deseja usar a plataforma</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>Eu sou:</label>
+                    <select id="userType">
+                        <option value="userLocatario">Locatário (Quero alugar itens)</option>
+                        <option value="userLocador">Locador (Quero oferecer itens)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nome Completo:</label>
+                    <input type="text" id="nome" placeholder="Ex: João Silva" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" placeholder="email@exemplo.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Documento (CPF/CNPJ):</label>
+                    <input type="text" id="documento" placeholder="000.000.000-00" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Senha:</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="registerBtn">
+                    <span class="btn-text">Finalizar Cadastro</span>
+                </button>
+            </form>
+
+            <p id="message" class="alert" style="display:none;"></p>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <p style="font-size: 14px; color: #64748b;">
+                    Já tem uma conta? <a href="login.html" style="color: #6366F1; text-decoration: none; font-weight: 600;">Faça Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("registerForm");
+        const message = document.getElementById("message");
+        const btn = document.getElementById("registerBtn");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            btn.classList.add("loading");
+            btn.innerText = "Processando...";
+            message.style.display = "none";
+
+            const payload = {
+                type: document.getElementById("userType").value,
+                nome: document.getElementById("nome").value,
+                email: document.getElementById("email").value,
+                documento: document.getElementById("documento").value,
+                senha: document.getElementById("password").value
+            };
+
+            try {
+                const response = await fetch("/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    message.innerText = "Cadastro realizado!";
+                    message.className = "alert alert-success";
+                    message.style.display = "block";
+                    setTimeout(() => window.location.href = "login.html", 2000);
+                } else {
+                    const errorText = await response.text();
+                    message.innerText = errorText || "Erro ao cadastrar.";
+                    message.className = "alert alert-error";
+                    message.style.display = "block";
+                    btn.classList.remove("loading");
+                    btn.innerText = "Finalizar Cadastro";
+                }
+            } catch (err) {
+                message.innerText = "Erro de conexão.";
+                message.className = "alert alert-error";
+                message.style.display = "block";
+                btn.classList.remove("loading");
+                btn.innerText = "Finalizar Cadastro";
+            }
+        });
+    </script>
+</body>
+</html>
