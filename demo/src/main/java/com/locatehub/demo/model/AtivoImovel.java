@@ -6,8 +6,8 @@ public class AtivoImovel extends Ativo {
 
     private BigDecimal taxaLimpeza;
 
-    public AtivoImovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza) {
-        super(id, titulo, diaria);
+    public AtivoImovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza, String donoId) {
+        super(id, titulo, diaria, donoId);
         this.taxaLimpeza = taxaLimpeza;
     }
 

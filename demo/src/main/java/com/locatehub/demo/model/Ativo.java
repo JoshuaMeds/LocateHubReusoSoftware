@@ -8,11 +8,17 @@ public abstract class Ativo {
     private String titulo;
     private BigDecimal valorDiaria;
     private boolean disponivel = true;
+    private String donoId;
 
-    public Ativo(Long id, String titulo, BigDecimal valorDiaria) {
+    public Ativo(Long id, String titulo, BigDecimal valorDiaria, String donoId) {
         this.id = id;
         this.titulo = titulo;
         this.valorDiaria = valorDiaria;
+        this.donoId = donoId;
+    }
+
+    public boolean podeSerGerenciadoPor(String usuarioId) {
+        return donoId != null && donoId.equals(usuarioId);
     }
 
     public boolean isDisponivel() {

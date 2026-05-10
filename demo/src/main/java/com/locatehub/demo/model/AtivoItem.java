@@ -7,8 +7,8 @@ public class AtivoItem extends Ativo {
     private boolean caucao;
     private BigDecimal valorCaucao;
 
-    public AtivoItem(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao) {
-        super(id, titulo, diaria);
+    public AtivoItem(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao, String donoId) {
+        super(id, titulo, diaria, donoId);
         this.caucao = caucao;
         this.valorCaucao = valorCaucao;
     }

@@ -6,8 +6,8 @@ public class AtivoAutomovel extends Ativo {
 
     private BigDecimal seguroDiario;
 
-    public AtivoAutomovel(Long id, String titulo, BigDecimal diaria, BigDecimal seguroDiario) {
-        super(id, titulo, diaria);
+    public AtivoAutomovel(Long id, String titulo, BigDecimal diaria, BigDecimal seguroDiario, String donoId) {
+        super(id, titulo, diaria, donoId);
         this.seguroDiario = seguroDiario;
     }
 
