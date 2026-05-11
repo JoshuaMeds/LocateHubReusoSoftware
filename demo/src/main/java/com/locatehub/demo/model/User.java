@@ -24,6 +24,10 @@ public abstract class User {
     protected Long id;
     protected String nome;
 
+    public Long getId() {
+        return id;
+    }
+
     public String getSenha() {
         return senha;
     }

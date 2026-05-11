@@ -1,12 +1,26 @@
 package com.locatehub.demo.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 
+@Entity
+@Table(name = "ativo_imovel")
+@DiscriminatorValue("IMOVEL")
+@PrimaryKeyJoinColumn(name = "ativo_id")
 public class AtivoImovel extends Ativo {
 
+    @Column(name = "taxa_limpeza", nullable = false)
     private BigDecimal taxaLimpeza;
 
-    public AtivoImovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza, String donoId) {
+    public AtivoImovel() {
+    }
+
+    public AtivoImovel(Long id, String titulo, BigDecimal diaria, BigDecimal taxaLimpeza, Long donoId) {
         super(id, titulo, diaria, donoId);
         this.taxaLimpeza = taxaLimpeza;
     }

@@ -1,6 +1,7 @@
 package com.locatehub.demo.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.List;
 @Entity
 public class UserLocador extends User {
     // Atributos específicos
+    @Transient
     private final List<String> meusProdutos;
     private double saldoDisponivel;
 

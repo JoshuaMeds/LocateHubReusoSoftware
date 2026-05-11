@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +18,14 @@
                 Sessão verificada com sucesso.
             </div>
 
+            <button onclick="window.location.href='ativos.html'" class="btn btn-primary" style="margin-top: 20px;">
+                Ver Ativos
+            </button>
+
+            <button onclick="window.location.href='listaDesejos.html'" class="btn btn-secondary">
+                Lista de Desejos
+            </button>
+
             <button onclick="logout()" class="btn btn-secondary" style="margin-top: 20px;">
                 Sair da Conta
             </button>
@@ -33,10 +41,10 @@
 
             if (!response.ok) {
                 window.location.href = "index.html";
-            } else {
-                // Opcional: define um texto padrão se a sessão estiver ok
-                document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+                return;
             }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
         }
 
         async function logout() {
