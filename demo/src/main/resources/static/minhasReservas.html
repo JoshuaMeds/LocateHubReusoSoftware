@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Reservas - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            align-items: flex-start;
+        }
+
+        .container-main {
+            max-width: 860px;
+        }
+
+        .reservation-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .reservation-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .reservation-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .reservation-title {
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .reservation-meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .empty {
+            color: #64748b;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <div class="card">
+        <div class="page-header">
+            <h1>Minhas reservas</h1>
+            <p>Reservas feitas por voce</p>
+        </div>
+
+        <div id="lista" class="reservation-list"></div>
+
+        <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button" style="margin-top: 18px;">
+            Voltar
+        </button>
+
+        <p id="message" class="alert" style="display:none;"></p>
+    </div>
+</div>
+
+<script>
+    const lista = document.getElementById("lista");
+    const money = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    function showMessage(text, success = false) {
+        const message = document.getElementById("message");
+        message.innerText = text;
+        message.className = success ? "alert alert-success" : "alert alert-error";
+        message.style.display = "block";
+    }
+
+    function formatDate(value) {
+        return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
+    }
+
+    async function carregarReservas() {
+        const response = await fetch("/reservas/minhas", { credentials: "include" });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        const reservas = await response.json();
+        renderReservas(reservas);
+    }
+
+    function renderReservas(reservas) {
+        lista.innerHTML = "";
+
+        if (reservas.length === 0) {
+            lista.innerHTML = "<p class='empty'>Nenhuma reserva encontrada.</p>";
+            return;
+        }
+
+        reservas.forEach((reserva) => {
+            const item = document.createElement("div");
+            item.className = "reservation-item";
+
+            const cancelButton = reserva.podeCancelar
+                ? `<button class="btn btn-secondary" type="button">Cancelar reserva</button>`
+                : "";
+
+            item.innerHTML = `
+                <div class="reservation-header">
+                    <div>
+                        <div class="reservation-title">${reserva.produto}</div>
+                        <div class="reservation-meta">${formatDate(reserva.dataInicio)} ate ${formatDate(reserva.dataFim)}</div>
+                    </div>
+                    <span class="badge">${reserva.status}</span>
+                </div>
+                <div class="reservation-meta">${money.format(reserva.valorTotal)}</div>
+                ${cancelButton}
+            `;
+
+            const button = item.querySelector("button");
+            if (button) {
+                button.addEventListener("click", async () => cancelarReserva(reserva.id));
+            }
+
+            lista.appendChild(item);
+        });
+    }
+
+    async function cancelarReserva(id) {
+        const response = await fetch(`/reservas/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        showMessage("Reserva cancelada.", true);
+        await carregarReservas();
+    }
+
+    carregarReservas();
+</script>
+</body>
+</html>

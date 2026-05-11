@@ -153,6 +153,11 @@
             const statusClass = ativo.disponivel ? "available" : "unavailable";
             const statusText = ativo.disponivel ? "Disponível" : "Indisponível";
             const descricao = ativo.descricao ? `<div class="asset-meta">${ativo.descricao}</div>` : "";
+            const wishlistButton = ativo.podeUsarListaDesejos
+                ? `<button class="btn btn-secondary" type="button">
+                    ${ativo.naListaDesejos ? "Remover da lista de desejos" : "Adicionar à lista de desejos"}
+                </button>`
+                : "";
 
             item.innerHTML = `
                 <div class="asset-header">
@@ -166,15 +171,16 @@
                 <div>
                     <span class="badge ${statusClass}">${statusText}</span>
                 </div>
-                <button class="btn btn-secondary" type="button">
-                    ${ativo.naListaDesejos ? "Remover da lista de desejos" : "Adicionar à lista de desejos"}
-                </button>
+                ${wishlistButton}
             `;
 
-            item.querySelector("button").addEventListener("click", async (event) => {
-                event.stopPropagation();
-                await alternarListaDesejos(ativo);
-            });
+            const button = item.querySelector("button");
+            if (button) {
+                button.addEventListener("click", async (event) => {
+                    event.stopPropagation();
+                    await alternarListaDesejos(ativo);
+                });
+            }
 
             lista.appendChild(item);
         });

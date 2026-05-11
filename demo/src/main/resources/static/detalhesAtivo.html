@@ -55,6 +55,25 @@
         .actions {
             margin-top: 18px;
         }
+
+        .reservation-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .reservation-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .reservation-meta {
+            color: #64748b;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -73,7 +92,7 @@
         <div id="valorDiaria" class="price"></div>
 
         <div class="details-grid">
-            <form id="simulacaoForm">
+            <form id="reservaForm">
                 <div class="form-group">
                     <label>Data de início</label>
                     <input type="date" id="dataInicio" required>
@@ -84,10 +103,10 @@
                     <input type="date" id="dataFim" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Simular reserva</button>
+                <button type="submit" class="btn btn-primary">Reservar</button>
             </form>
 
-            <div id="resultadoSimulacao" class="alert" style="display:none;"></div>
+            <div id="resultadoReserva" class="alert" style="display:none;"></div>
 
             <div id="locatarioActions" class="actions" style="display:none;">
                 <button id="wishlistBtn" class="btn btn-secondary" type="button"></button>
@@ -95,10 +114,14 @@
 
             <div id="locadorActions" class="actions" style="display:none;">
                 <button id="disponibilidadeBtn" class="btn btn-secondary" type="button"></button>
-                <button id="excluirBtn" class="btn btn-primary" type="button">Excluir ativo</button>
             </div>
 
-            <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button">Voltar</button>
+            <div id="locadorReservas" style="display:none;">
+                <h2 style="font-size: 1rem; color: #1e293b;">Reservas deste ativo</h2>
+                <div id="listaReservas" class="reservation-list"></div>
+            </div>
+
+            <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button">Menu principal</button>
         </div>
 
         <p id="message" class="alert" style="display:none;"></p>
@@ -150,6 +173,7 @@
 
         const locatarioActions = document.getElementById("locatarioActions");
         locatarioActions.style.display = ativoAtual.podeUsarListaDesejos ? "block" : "none";
+        document.getElementById("reservaForm").style.display = ativoAtual.podeUsarListaDesejos && ativoAtual.disponivel ? "block" : "none";
 
         const wishlistBtn = document.getElementById("wishlistBtn");
         wishlistBtn.innerText = ativoAtual.naListaDesejos ? "Remover da lista de desejos" : "Adicionar à lista de desejos";
@@ -159,22 +183,60 @@
 
         const disponibilidadeBtn = document.getElementById("disponibilidadeBtn");
         disponibilidadeBtn.innerText = ativoAtual.disponivel ? "Indisponibilizar ativo" : "Disponibilizar ativo";
+
+        document.getElementById("locadorReservas").style.display = ativoAtual.podeGerenciar ? "block" : "none";
+        if (ativoAtual.podeGerenciar) {
+            carregarReservasDoAtivo();
+        }
     }
 
-    document.getElementById("simulacaoForm").addEventListener("submit", async (event) => {
+    async function carregarReservasDoAtivo() {
+        const response = await fetch(`/reservas/ativos/${ativoId}`, { credentials: "include" });
+        const listaReservas = document.getElementById("listaReservas");
+
+        if (!response.ok) {
+            listaReservas.innerHTML = "<p class='reservation-meta'>Nao foi possivel carregar as reservas.</p>";
+            return;
+        }
+
+        const reservas = await response.json();
+        if (reservas.length === 0) {
+            listaReservas.innerHTML = "<p class='reservation-meta'>Nenhuma reserva ativa para este ativo.</p>";
+            return;
+        }
+
+        listaReservas.innerHTML = "";
+        reservas.forEach((reserva) => {
+            const item = document.createElement("div");
+            item.className = "reservation-item";
+            item.innerHTML = `
+                <strong>${reserva.locatario} - ${reserva.status}</strong>
+                <span class="reservation-meta">${formatDate(reserva.dataInicio)} ate ${formatDate(reserva.dataFim)}</span>
+                <span class="reservation-meta">${money.format(reserva.valorTotal)}</span>
+            `;
+            listaReservas.appendChild(item);
+        });
+    }
+
+    function formatDate(value) {
+        return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
+    }
+
+    document.getElementById("reservaForm").addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const response = await fetch(`/ativos/${ativoId}/simular`, {
+        const response = await fetch("/reservas", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({
+                ativoId: Number(ativoId),
                 dataInicio: document.getElementById("dataInicio").value,
                 dataFim: document.getElementById("dataFim").value
             })
         });
 
-        const resultado = document.getElementById("resultadoSimulacao");
+        const resultado = document.getElementById("resultadoReserva");
         resultado.style.display = "block";
 
         if (!response.ok) {
@@ -185,7 +247,7 @@
 
         const data = await response.json();
         resultado.className = "alert alert-success";
-        resultado.innerText = `${data.dias} dia(s): ${money.format(data.valorTotal)}`;
+        resultado.innerText = `Reserva criada: ${formatDate(data.dataInicio)} ate ${formatDate(data.dataFim)} - ${money.format(data.valorTotal)}`;
     });
 
     document.getElementById("wishlistBtn").addEventListener("click", async () => {
@@ -218,20 +280,6 @@
 
         ativoAtual = await response.json();
         renderAtivo();
-    });
-
-    document.getElementById("excluirBtn").addEventListener("click", async () => {
-        const response = await fetch(`/ativos/${ativoId}`, {
-            method: "DELETE",
-            credentials: "include"
-        });
-
-        if (!response.ok) {
-            showMessage(await response.text());
-            return;
-        }
-
-        window.location.href = "home.html";
     });
 
     carregarAtivo();

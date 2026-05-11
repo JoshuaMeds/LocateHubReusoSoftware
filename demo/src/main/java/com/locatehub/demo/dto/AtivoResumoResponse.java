@@ -15,9 +15,14 @@ public record AtivoResumoResponse(
         boolean disponivel,
         String tipo,
         String tipoNome,
-        boolean naListaDesejos
+        boolean naListaDesejos,
+        boolean podeUsarListaDesejos
 ) {
     public static AtivoResumoResponse from(Ativo ativo, boolean naListaDesejos) {
+        return from(ativo, naListaDesejos, true);
+    }
+
+    public static AtivoResumoResponse from(Ativo ativo, boolean naListaDesejos, boolean podeUsarListaDesejos) {
         return new AtivoResumoResponse(
                 ativo.getId(),
                 ativo.getTitulo(),
@@ -26,7 +31,8 @@ public record AtivoResumoResponse(
                 ativo.isDisponivel(),
                 tipoCodigo(ativo),
                 ativo.getTipo(),
-                naListaDesejos
+                naListaDesejos,
+                podeUsarListaDesejos
         );
     }
 
