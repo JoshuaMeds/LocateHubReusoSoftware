@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Anúncio - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container-main">
+    <div class="card">
+        <div class="page-header">
+            <h1>Anunciar Novo Ativo</h1>
+            <p>Escolha a categoria e preencha os detalhes</p>
+        </div>
+
+        <form id="ativoForm">
+            <div class="form-group">
+                <label>Título do Anúncio</label>
+                <input type="text" id="titulo" placeholder="Ex: Apartamento ou Carro" required>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="tipoAtivo" required>
+                    <option value="" disabled selected>Selecione...</option>
+                    <option value="AUTOMOVEL">Automóvel</option>
+                    <option value="IMOVEL">Imóvel</option>
+                    <option value="ITEM">Item / Objeto</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="descricao" placeholder="Detalhes do ativo..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Valor da Diária</label>
+                <div class="input-group-price">
+                    <span>R$</span>
+                    <input type="number" id="valorDiaria" step="0.01" required>
+                </div>
+            </div>
+
+            <div id="dynamicContainer" style="display: none; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                
+                <div id="fields-AUTOMOVEL" class="type-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>Seguro Diário</label>
+                        <div class="input-group-price"><span>R$</span><input type="number" id="seguroDiario" step="0.01"></div>
+                    </div>
+                </div>
+
+                <div id="fields-IMOVEL" class="type-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>Taxa de Limpeza</label>
+                        <div class="input-group-price"><span>R$</span><input type="number" id="taxaLimpeza" step="0.01"></div>
+                    </div>
+                </div>
+
+                <div id="fields-ITEM" class="type-fields" style="display: none;">
+                    <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+                        <input type="checkbox" id="exigirCaucao" style="width: auto;">
+                        <label style="margin-bottom: 0;">Exigir Caução?</label>
+                    </div>
+                    <div id="caucaoGroup" style="display: none;">
+                        <div class="form-group">
+                            <label>Valor do Caução</label>
+                            <div class="input-group-price"><span>R$</span><input type="number" id="valorCaucao" step="0.01"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="btnSubmit" style="margin-top: 20px;">Publicar Anúncio</button>
+        </form>
+
+        <div id="feedback" class="alert" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+    const tipoSelect = document.getElementById('tipoAtivo');
+    const dynamicContainer = document.getElementById('dynamicContainer');
+    const typeFields = document.querySelectorAll('.type-fields');
+    const exigirCaucao = document.getElementById('exigirCaucao');
+    const caucaoGroup = document.getElementById('caucaoGroup');
+
+    // Mostra campos específicos baseados na categoria selecionada
+    tipoSelect.addEventListener('change', (e) => {
+        dynamicContainer.style.display = 'block';
+        typeFields.forEach(f => f.style.display = 'none');
+        document.getElementById(`fields-${e.target.value}`).style.display = 'block';
+    });
+
+    // Toggle do campo de valor de caução
+    exigirCaucao.addEventListener('change', (e) => {
+        caucaoGroup.style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('ativoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        const feedback = document.getElementById('feedback');
+        
+        btn.innerText = "Publicando...";
+        btn.disabled = true;
+        feedback.style.display = 'none';
+
+        const tipo = tipoSelect.value;
+        const payload = {
+            type: tipo, // Necessário para o Jackson no Java instanciar a classe certa
+            titulo: document.getElementById('titulo').value,
+            descricao: document.getElementById('descricao').value,
+            valorDiaria: parseFloat(document.getElementById('valorDiaria').value)
+        };
+
+        // Adiciona atributos específicos
+        if (tipo === 'AUTOMOVEL') payload.seguroDiario = parseFloat(document.getElementById('seguroDiario').value || 0);
+        if (tipo === 'IMOVEL') payload.taxaLimpeza = parseFloat(document.getElementById('taxaLimpeza').value || 0);
+        if (tipo === 'ITEM') {
+            payload.caucao = exigirCaucao.checked;
+            payload.valorCaucao = exigirCaucao.checked ? parseFloat(document.getElementById('valorCaucao').value || 0) : 0;
+        }
+
+        try {
+            const response = await fetch('/ativos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            feedback.style.display = 'block';
+            if (response.ok) {
+                feedback.className = "alert alert-success";
+                feedback.innerText = "Anúncio publicado com sucesso!";
+                document.getElementById('ativoForm').reset();
+                dynamicContainer.style.display = 'none';
+            } else {
+                const erro = await response.text();
+                feedback.className = "alert alert-error";
+                feedback.innerText = "Erro: " + erro;
+            }
+        } catch (err) {
+            feedback.className = "alert alert-error";
+            feedback.innerText = "Erro de conexão com o servidor.";
+        } finally {
+            btn.innerText = "Publicar Anúncio";
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

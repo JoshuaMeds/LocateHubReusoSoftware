@@ -1,14 +1,12 @@
 package com.locatehub.demo.controller;
 
-import com.locatehub.demo.dto.AtivoResumoResponse;
-import com.locatehub.demo.model.Ativo;
-import com.locatehub.demo.model.User;
-import com.locatehub.demo.model.UserLocador;
-import com.locatehub.demo.model.UserLocatario;
-import com.locatehub.demo.repository.AtivoRepository;
-import com.locatehub.demo.repository.ListaDesejosRepository;
-import com.locatehub.demo.service.UserService;
-import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +18,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import com.locatehub.demo.dto.AtivoResumoResponse;
+import com.locatehub.demo.model.Ativo;
+import com.locatehub.demo.model.User;
+import com.locatehub.demo.model.UserLocador;
+import com.locatehub.demo.model.UserLocatario;
+import com.locatehub.demo.repository.AtivoRepository;
+import com.locatehub.demo.repository.ListaDesejosRepository;
+import com.locatehub.demo.service.UserService;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/ativos")
@@ -43,6 +45,26 @@ public class AtivoController {
         this.ativoRepository = ativoRepository;
         this.listaDesejosRepository = listaDesejosRepository;
         this.userService = userService;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> criar(@RequestBody Ativo ativo, HttpSession session) {
+        Optional<User> usuario = usuarioLogado(session);
+
+        if (usuario.isEmpty() || !(usuario.get() instanceof UserLocador)) {
+            return ResponseEntity.status(403).body("Apenas locadores logados podem criar ativos.");
+        }
+
+        try {
+            java.lang.reflect.Field field = Ativo.class.getDeclaredField("donoId");
+            field.setAccessible(true);
+            field.set(ativo, usuario.get().getId());
+
+            Ativo novoAtivo = ativoRepository.save(ativo);
+            return ResponseEntity.status(201).body(novoAtivo);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Erro ao salvar ativo: " + e.getMessage());
+        }
     }
 
     @GetMapping
@@ -96,6 +118,24 @@ public class AtivoController {
 
         return ResponseEntity.ok(AtivoDetalheResponse.from(ativo, naListaDesejos, podeGerenciar, podeUsarListaDesejos));
     }
+
+    @GetMapping("/meusAnuncios")
+    public ResponseEntity<?> listarMeusAtivos(HttpSession session) {
+        Optional<User> usuario = usuarioLogado(session);
+
+        if (usuario.isEmpty() || !(usuario.get() instanceof UserLocador)) {
+            return ResponseEntity.status(403).body("Apenas locadores podem visualizar seus próprios ativos.");
+        }
+
+        // Filtra os ativos onde o donoId é igual ao ID do usuário logado
+        List<AtivoResumoResponse> meusAtivos = ativoRepository.findAll()
+                .stream()
+                .filter(ativo -> ativo.getDonoId().equals(usuario.get().getId()))
+                .map(ativo -> AtivoResumoResponse.from(ativo, false)) // false pois o dono não precisa de lista de desejos própria
+                .toList();
+
+        return ResponseEntity.ok(meusAtivos);
+}
 
     @PostMapping("/{id}/simular")
     public ResponseEntity<?> simularReserva(@PathVariable Long id, @RequestBody SimulacaoRequest request) {
@@ -175,6 +215,8 @@ public class AtivoController {
 
         return userService.findByEmail(emailUsuario);
     }
+
+    // --- SEUS RECORDS ORIGINAIS PRESERVADOS ---
 
     public record SimulacaoRequest(LocalDate dataInicio, LocalDate dataFim) {
     }
