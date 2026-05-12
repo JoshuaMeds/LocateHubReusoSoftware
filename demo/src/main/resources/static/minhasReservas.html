@@ -82,6 +82,20 @@
 </div>
 
 <script>
+    async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
+
     const lista = document.getElementById("lista");
     const money = new Intl.NumberFormat("pt-BR", {
         style: "currency",
@@ -163,6 +177,19 @@
         await carregarReservas();
     }
 
+    async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
     carregarReservas();
 </script>
 </body>

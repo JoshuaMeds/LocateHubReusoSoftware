@@ -16,16 +16,14 @@ public class AtivoItem extends Ativo {
 
     private boolean caucao;
 
-    @Column(name = "valor_caucao", nullable = false)
+    @Column(name = "valor_caucao")
     private BigDecimal valorCaucao;
 
     public AtivoItem() {
     }
 
-    public AtivoItem(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao, Long donoId) {
-        super(id, titulo, diaria, donoId);
-        this.caucao = caucao;
-        this.valorCaucao = valorCaucao;
+    public AtivoItem(String titulo, BigDecimal diaria, Long donoId, String descricao) {
+        super(titulo, diaria, donoId,descricao);
     }
 
     @Override

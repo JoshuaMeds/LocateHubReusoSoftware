@@ -99,6 +99,20 @@
 </div>
 
 <script>
+    async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
+
     const lista = document.getElementById("lista");
     const filtro = document.getElementById("tipoFiltro");
     const money = new Intl.NumberFormat("pt-BR", {
@@ -176,6 +190,7 @@
     }
 
     filtro.addEventListener("change", carregarLista);
+    checkSession();
     carregarLista();
 </script>
 </body>

@@ -39,11 +39,11 @@ public abstract class Ativo {
     protected Ativo() {
     }
 
-    public Ativo(Long id, String titulo, BigDecimal valorDiaria, Long donoId) {
-        this.id = id;
+    public Ativo(String titulo, BigDecimal valorDiaria, Long donoId , String descricao) {
         this.titulo = titulo;
         this.valorDiaria = valorDiaria;
         this.donoId = donoId;
+        this.descricao = descricao;
     }
 
     public Long getId() {

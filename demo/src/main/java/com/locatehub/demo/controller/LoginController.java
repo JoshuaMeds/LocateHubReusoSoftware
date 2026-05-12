@@ -40,8 +40,11 @@ public class LoginController {
 
         System.out.println("USER /session: " + user);
 
+
         if(user != null){
-            return ResponseEntity.ok("Authenticated");
+            Optional<User> userLogado = service.findByEmail(user);
+            String id = userLogado.get().getId().toString();
+            return ResponseEntity.ok(id);
         }
 
         return ResponseEntity.status(403).body("Unauthorized");

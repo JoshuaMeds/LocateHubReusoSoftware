@@ -129,6 +129,20 @@
 </div>
 
 <script>
+    async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
+
     const params = new URLSearchParams(window.location.search);
     const ativoId = params.get("id");
     let ativoAtual = null;
@@ -283,6 +297,7 @@
     });
 
     carregarAtivo();
+    checkSession();
 </script>
 </body>
 </html>

@@ -52,6 +52,20 @@
     </div>
 
     <script>
+        async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
+
         const itemForm = document.getElementById("itemForm");
         const message = document.getElementById("message");
         const btn = document.getElementById("saveItemBtn");
@@ -97,6 +111,8 @@
                 btn.innerText = "Publicar Anúncio";
             }
         });
+
+        checkSession();
     </script>
 </body>
 </html>

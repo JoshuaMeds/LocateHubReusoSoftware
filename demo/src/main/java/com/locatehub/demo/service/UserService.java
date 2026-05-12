@@ -28,6 +28,10 @@ public class UserService {
         return repository.findByEmail(email);
     }
 
+    public Optional<User> findById(long id){
+        return repository.findById(id);
+    }
+
     public Optional<User> findByDocumento(String documento){
         return repository.findByDocumento(documento);
     }

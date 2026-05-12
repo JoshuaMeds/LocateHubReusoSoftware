@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import com.locatehub.demo.dto.AtivoRequest;
+import com.locatehub.demo.model.AtivoAutomovel;
+import com.locatehub.demo.model.AtivoImovel;
+import com.locatehub.demo.model.AtivoItem;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,19 +52,27 @@ public class AtivoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Ativo ativo, HttpSession session) {
-        Optional<User> usuario = usuarioLogado(session);
+    public ResponseEntity<?> criar(@RequestBody AtivoRequest ativo, HttpSession session) {
 
-        if (usuario.isEmpty() || !(usuario.get() instanceof UserLocador)) {
+
+        Optional<User> usuario = userService.findById(ativo.donoId());
+
+        if (usuario.isEmpty() || (usuario.get() instanceof UserLocatario)) {
             return ResponseEntity.status(403).body("Apenas locadores logados podem criar ativos.");
         }
-
+        Ativo novoAtivo;
         try {
-            java.lang.reflect.Field field = Ativo.class.getDeclaredField("donoId");
-            field.setAccessible(true);
-            field.set(ativo, usuario.get().getId());
+            if(ativo.type().equals("AUTOMOVEL")){
+                novoAtivo = new AtivoAutomovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
+            else if(ativo.type().equals("IMOVEL")){
+                novoAtivo = new AtivoImovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
+            else{
+                novoAtivo = new AtivoItem(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
 
-            Ativo novoAtivo = ativoRepository.save(ativo);
+            ativoRepository.save(novoAtivo);
             return ResponseEntity.status(201).body(novoAtivo);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao salvar ativo: " + e.getMessage());
