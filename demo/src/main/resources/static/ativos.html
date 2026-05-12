@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ativos - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            align-items: flex-start;
+        }
+
+        .container-main {
+            max-width: 860px;
+        }
+
+        .asset-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .asset-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            display: grid;
+            gap: 10px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .asset-item:hover {
+            border-color: #6366F1;
+            transform: translateY(-1px);
+        }
+
+        .asset-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .asset-title {
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .asset-meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .badge.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty {
+            color: #64748b;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <div class="card">
+        <div class="page-header">
+            <h1>Ativos disponíveis</h1>
+            <p>Encontre um ativo e abra os detalhes</p>
+        </div>
+
+        <div class="form-group">
+            <label>Filtrar por tipo</label>
+            <select id="tipoFiltro">
+                <option value="">Todos</option>
+                <option value="IMOVEL">Imóvel</option>
+                <option value="AUTOMOVEL">Automóvel</option>
+                <option value="ITEM">Item</option>
+            </select>
+        </div>
+
+        <div id="lista" class="asset-list"></div>
+
+        <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button" style="margin-top: 18px;">
+            Voltar
+        </button>
+
+        <p id="message" class="alert" style="display:none;"></p>
+    </div>
+</div>
+
+<script>
+    const lista = document.getElementById("lista");
+    const filtro = document.getElementById("tipoFiltro");
+    const money = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    function showMessage(text) {
+        const message = document.getElementById("message");
+        message.innerText = text;
+        message.className = "alert alert-error";
+        message.style.display = "block";
+    }
+
+    async function carregarAtivos() {
+        const tipo = filtro.value;
+        const url = tipo ? `/ativos?tipo=${tipo}` : "/ativos";
+        const response = await fetch(url, { credentials: "include" });
+
+        if (!response.ok) {
+            showMessage("Não foi possível carregar os ativos.");
+            return;
+        }
+
+        const ativos = await response.json();
+        renderAtivos(ativos);
+    }
+
+    function renderAtivos(ativos) {
+        lista.innerHTML = "";
+
+        if (ativos.length === 0) {
+            lista.innerHTML = "<p class='empty'>Nenhum ativo encontrado.</p>";
+            return;
+        }
+
+        ativos.forEach((ativo) => {
+            const item = document.createElement("div");
+            item.className = "asset-item";
+            item.onclick = () => window.location.href = `detalhesAtivo.html?id=${ativo.id}`;
+
+            const statusClass = ativo.disponivel ? "available" : "unavailable";
+            const statusText = ativo.disponivel ? "Disponível" : "Indisponível";
+            const descricao = ativo.descricao ? `<div class="asset-meta">${ativo.descricao}</div>` : "";
+            const wishlistButton = ativo.podeUsarListaDesejos
+                ? `<button class="btn btn-secondary" type="button">
+                    ${ativo.naListaDesejos ? "Remover da lista de desejos" : "Adicionar à lista de desejos"}
+                </button>`
+                : "";
+
+            item.innerHTML = `
+                <div class="asset-header">
+                    <div>
+                        <div class="asset-title">${ativo.titulo}</div>
+                        <div class="asset-meta">${money.format(ativo.valorDiaria)} / dia</div>
+                    </div>
+                    <span class="badge">${ativo.tipoNome}</span>
+                </div>
+                ${descricao}
+                <div>
+                    <span class="badge ${statusClass}">${statusText}</span>
+                </div>
+                ${wishlistButton}
+            `;
+
+            const button = item.querySelector("button");
+            if (button) {
+                button.addEventListener("click", async (event) => {
+                    event.stopPropagation();
+                    await alternarListaDesejos(ativo);
+                });
+            }
+
+            lista.appendChild(item);
+        });
+    }
+
+    async function alternarListaDesejos(ativo) {
+        const response = await fetch(`/lista-desejos/${ativo.id}`, {
+            method: ativo.naListaDesejos ? "DELETE" : "POST",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        ativo.naListaDesejos = !ativo.naListaDesejos;
+        const message = document.getElementById("message");
+        message.innerText = ativo.naListaDesejos
+            ? "Ativo adicionado à lista de desejos."
+            : "Ativo removido da lista de desejos.";
+        message.className = "alert alert-success";
+        message.style.display = "block";
+
+        await carregarAtivos();
+    }
+
+    filtro.addEventListener("change", carregarAtivos);
+    carregarAtivos();
+</script>
+</body>
+</html>

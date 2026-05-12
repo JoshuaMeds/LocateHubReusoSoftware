@@ -172,3 +172,140 @@ body {
     border: 1px solid #fecaca;
     color: #991b1b;
 }
+.dynamic-fields {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.type-fields small {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 4px;
+}
+/* Layout do Dashboard */
+.container-dashboard {
+    width: 100%;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    color: #1e293b;
+    font-size: 24px;
+}
+
+.btn-add {
+    width: auto !important;
+    padding: 12px 24px !important;
+}
+
+/* Grid de Cards */
+.grid-meus-ativos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.ativo-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ativo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Tipografia e Tags no Card */
+.tag-tipo {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.tag-automovel { background: #e0e7ff; color: #4338ca; }
+.tag-imovel { background: #fef3c7; color: #92400e; }
+.tag-item { background: #d1fae5; color: #065f46; }
+
+.ativo-card h2 {
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.ativo-card p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.preco {
+    font-size: 20px;
+    font-weight: 700;
+    color: #6366F1;
+    margin: 15px 0;
+}
+
+.preco span {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Ações */
+.card-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 15px;
+}
+
+.btn-delete {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+}
+
+.btn-delete:hover {
+    background: #fecaca !important;
+}
+
+/* Estados Vazios */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 2px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.loading-state {
+    text-align: center;
+    grid-column: 1 / -1;
+    padding: 40px;
+    color: #94a3b8;
+}

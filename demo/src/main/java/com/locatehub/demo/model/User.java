@@ -35,6 +35,10 @@ public abstract class User {
 
     }
 
+    public Long getId() {
+        return id;
+    }
+
     public String getSenha() {
         return senha;
     }

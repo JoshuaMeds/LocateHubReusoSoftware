@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Ativo - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            align-items: flex-start;
+        }
+
+        .container-main {
+            max-width: 760px;
+        }
+
+        .details-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .price {
+            color: #1e293b;
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 8px 0 16px;
+        }
+
+        .actions {
+            margin-top: 18px;
+        }
+
+        .reservation-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .reservation-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .reservation-meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <div class="card">
+        <div class="page-header">
+            <h1 id="titulo">Carregando ativo...</h1>
+            <p id="descricao"></p>
+        </div>
+
+        <div class="meta-row">
+            <span id="tipo" class="badge"></span>
+            <span id="disponibilidade" class="badge"></span>
+        </div>
+
+        <div id="valorDiaria" class="price"></div>
+
+        <div class="details-grid">
+            <form id="reservaForm">
+                <div class="form-group">
+                    <label>Data de início</label>
+                    <input type="date" id="dataInicio" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Data de fim</label>
+                    <input type="date" id="dataFim" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Reservar</button>
+            </form>
+
+            <div id="resultadoReserva" class="alert" style="display:none;"></div>
+
+            <div id="locatarioActions" class="actions" style="display:none;">
+                <button id="wishlistBtn" class="btn btn-secondary" type="button"></button>
+            </div>
+
+            <div id="locadorActions" class="actions" style="display:none;">
+                <button id="disponibilidadeBtn" class="btn btn-secondary" type="button"></button>
+            </div>
+
+            <div id="locadorReservas" style="display:none;">
+                <h2 style="font-size: 1rem; color: #1e293b;">Reservas deste ativo</h2>
+                <div id="listaReservas" class="reservation-list"></div>
+            </div>
+
+            <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button">Menu principal</button>
+        </div>
+
+        <p id="message" class="alert" style="display:none;"></p>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const ativoId = params.get("id");
+    let ativoAtual = null;
+
+    const money = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    function showMessage(text, success = false) {
+        const message = document.getElementById("message");
+        message.innerText = text;
+        message.className = success ? "alert alert-success" : "alert alert-error";
+        message.style.display = "block";
+    }
+
+    async function carregarAtivo() {
+        if (!ativoId) {
+            showMessage("Ativo não informado.");
+            return;
+        }
+
+        const response = await fetch(`/ativos/${ativoId}`, { credentials: "include" });
+        if (!response.ok) {
+            showMessage("Não foi possível carregar o ativo.");
+            return;
+        }
+
+        ativoAtual = await response.json();
+        renderAtivo();
+    }
+
+    function renderAtivo() {
+        document.getElementById("titulo").innerText = ativoAtual.titulo;
+        document.getElementById("descricao").innerText = ativoAtual.descricao || "";
+        document.getElementById("tipo").innerText = ativoAtual.tipoNome;
+        document.getElementById("valorDiaria").innerText = `${money.format(ativoAtual.valorDiaria)} / dia`;
+
+        const disponibilidade = document.getElementById("disponibilidade");
+        disponibilidade.innerText = ativoAtual.disponivel ? "Disponível" : "Indisponível";
+        disponibilidade.className = ativoAtual.disponivel ? "badge available" : "badge unavailable";
+
+        const locatarioActions = document.getElementById("locatarioActions");
+        locatarioActions.style.display = ativoAtual.podeUsarListaDesejos ? "block" : "none";
+        document.getElementById("reservaForm").style.display = ativoAtual.podeUsarListaDesejos && ativoAtual.disponivel ? "block" : "none";
+
+        const wishlistBtn = document.getElementById("wishlistBtn");
+        wishlistBtn.innerText = ativoAtual.naListaDesejos ? "Remover da lista de desejos" : "Adicionar à lista de desejos";
+
+        const locadorActions = document.getElementById("locadorActions");
+        locadorActions.style.display = ativoAtual.podeGerenciar ? "block" : "none";
+
+        const disponibilidadeBtn = document.getElementById("disponibilidadeBtn");
+        disponibilidadeBtn.innerText = ativoAtual.disponivel ? "Indisponibilizar ativo" : "Disponibilizar ativo";
+
+        document.getElementById("locadorReservas").style.display = ativoAtual.podeGerenciar ? "block" : "none";
+        if (ativoAtual.podeGerenciar) {
+            carregarReservasDoAtivo();
+        }
+    }
+
+    async function carregarReservasDoAtivo() {
+        const response = await fetch(`/reservas/ativos/${ativoId}`, { credentials: "include" });
+        const listaReservas = document.getElementById("listaReservas");
+
+        if (!response.ok) {
+            listaReservas.innerHTML = "<p class='reservation-meta'>Nao foi possivel carregar as reservas.</p>";
+            return;
+        }
+
+        const reservas = await response.json();
+        if (reservas.length === 0) {
+            listaReservas.innerHTML = "<p class='reservation-meta'>Nenhuma reserva ativa para este ativo.</p>";
+            return;
+        }
+
+        listaReservas.innerHTML = "";
+        reservas.forEach((reserva) => {
+            const item = document.createElement("div");
+            item.className = "reservation-item";
+            item.innerHTML = `
+                <strong>${reserva.locatario} - ${reserva.status}</strong>
+                <span class="reservation-meta">${formatDate(reserva.dataInicio)} ate ${formatDate(reserva.dataFim)}</span>
+                <span class="reservation-meta">${money.format(reserva.valorTotal)}</span>
+            `;
+            listaReservas.appendChild(item);
+        });
+    }
+
+    function formatDate(value) {
+        return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
+    }
+
+    document.getElementById("reservaForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const response = await fetch("/reservas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                ativoId: Number(ativoId),
+                dataInicio: document.getElementById("dataInicio").value,
+                dataFim: document.getElementById("dataFim").value
+            })
+        });
+
+        const resultado = document.getElementById("resultadoReserva");
+        resultado.style.display = "block";
+
+        if (!response.ok) {
+            resultado.className = "alert alert-error";
+            resultado.innerText = await response.text();
+            return;
+        }
+
+        const data = await response.json();
+        resultado.className = "alert alert-success";
+        resultado.innerText = `Reserva criada: ${formatDate(data.dataInicio)} ate ${formatDate(data.dataFim)} - ${money.format(data.valorTotal)}`;
+    });
+
+    document.getElementById("wishlistBtn").addEventListener("click", async () => {
+        const response = await fetch(`/lista-desejos/${ativoId}`, {
+            method: ativoAtual.naListaDesejos ? "DELETE" : "POST",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        ativoAtual.naListaDesejos = !ativoAtual.naListaDesejos;
+        renderAtivo();
+    });
+
+    document.getElementById("disponibilidadeBtn").addEventListener("click", async () => {
+        const response = await fetch(`/ativos/${ativoId}/disponibilidade`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ disponivel: !ativoAtual.disponivel })
+        });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        ativoAtual = await response.json();
+        renderAtivo();
+    });
+
+    carregarAtivo();
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Desejos - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            align-items: flex-start;
+        }
+
+        .container-main {
+            max-width: 820px;
+        }
+
+        .wishlist-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .wishlist-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            display: grid;
+            gap: 10px;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .wishlist-item:hover {
+            border-color: #6366F1;
+            transform: translateY(-1px);
+        }
+
+        .wishlist-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .wishlist-title {
+            color: #1e293b;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .wishlist-meta {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .badge {
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #475569;
+            white-space: nowrap;
+        }
+
+        .empty {
+            color: #64748b;
+            padding: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container-main">
+    <div class="card">
+        <div class="page-header">
+            <h1>Lista de desejos</h1>
+            <p>Ativos salvos para consultar depois</p>
+        </div>
+
+        <div class="form-group">
+            <label>Filtrar por tipo</label>
+            <select id="tipoFiltro">
+                <option value="">Todos</option>
+                <option value="IMOVEL">Imóvel</option>
+                <option value="AUTOMOVEL">Automóvel</option>
+                <option value="ITEM">Item</option>
+            </select>
+        </div>
+
+        <div id="lista" class="wishlist-list"></div>
+
+        <button onclick="window.location.href='home.html'" class="btn btn-secondary" type="button" style="margin-top: 18px;">
+            Voltar
+        </button>
+
+        <p id="message" class="alert" style="display:none;"></p>
+    </div>
+</div>
+
+<script>
+    const lista = document.getElementById("lista");
+    const filtro = document.getElementById("tipoFiltro");
+    const money = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    function showMessage(text) {
+        const message = document.getElementById("message");
+        message.innerText = text;
+        message.className = "alert alert-error";
+        message.style.display = "block";
+    }
+
+    async function carregarLista() {
+        const tipo = filtro.value;
+        const url = tipo ? `/lista-desejos?tipo=${tipo}` : "/lista-desejos";
+        const response = await fetch(url, { credentials: "include" });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        const ativos = await response.json();
+        renderLista(ativos);
+    }
+
+    function renderLista(ativos) {
+        lista.innerHTML = "";
+
+        if (ativos.length === 0) {
+            lista.innerHTML = "<p class='empty'>Nenhum ativo encontrado.</p>";
+            return;
+        }
+
+        ativos.forEach((ativo) => {
+            const item = document.createElement("div");
+            item.className = "wishlist-item";
+            item.onclick = () => window.location.href = `detalhesAtivo.html?id=${ativo.id}`;
+
+            item.innerHTML = `
+                <div class="wishlist-header">
+                    <div>
+                        <div class="wishlist-title">${ativo.titulo}</div>
+                        <div class="wishlist-meta">${money.format(ativo.valorDiaria)} / dia</div>
+                    </div>
+                    <span class="badge">${ativo.tipoNome}</span>
+                </div>
+                <div class="wishlist-meta">${ativo.disponivel ? "Disponível" : "Indisponível"}</div>
+                <button class="btn btn-secondary" type="button">Remover</button>
+            `;
+
+            item.querySelector("button").addEventListener("click", async (event) => {
+                event.stopPropagation();
+                await remover(ativo.id);
+            });
+
+            lista.appendChild(item);
+        });
+    }
+
+    async function remover(ativoId) {
+        const response = await fetch(`/lista-desejos/${ativoId}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            showMessage(await response.text());
+            return;
+        }
+
+        await carregarLista();
+    }
+
+    filtro.addEventListener("change", carregarLista);
+    carregarLista();
+</script>
+</body>
+</html>

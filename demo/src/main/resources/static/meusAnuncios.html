@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Anúncios - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container-dashboard">
+    <header class="dashboard-header">
+        <div>
+            <h1>Meus Anúncios</h1>
+            <p>Gerencie seus itens cadastrados no sistema.</p>
+        </div>
+        <a href="criar-ativo.html" class="btn btn-primary btn-add">+ Novo Anúncio</a>
+    </header>
+
+    <div id="gridAtivos" class="grid-meus-ativos">
+        <div class="loading-state">Carregando seus anúncios...</div>
+    </div>
+
+    <div id="msgGeral" class="alert" style="display: none;"></div>
+</div>
+
+<script>
+    async function carregarMeusAnuncios() {
+        const container = document.getElementById('gridAtivos');
+        const feedback = document.getElementById('msgGeral');
+
+        try {
+            const response = await fetch('/ativos/meus');
+            
+            if (response.status === 403) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const ativos = await response.json();
+            container.innerHTML = '';
+
+            if (ativos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Nenhum ativo encontrado</h3>
+                        <p>Você ainda não cadastrou nada para alugar.</p>
+                    </div>`;
+                return;
+            }
+
+            ativos.forEach(ativo => {
+                const card = document.createElement('div');
+                card.className = 'ativo-card';
+                
+                const tipoTagClass = `tag-${ativo.tipo.toLowerCase()}`;
+
+                card.innerHTML = `
+                    <div class="card-content">
+                        <span class="tag-tipo ${tipoTagClass}">${ativo.tipoNome}</span>
+                        <h2>${ativo.titulo}</h2>
+                        <p>${ativo.descricao || 'Sem descrição.'}</p>
+                        <div class="preco">R$ ${ativo.valorDiaria.toFixed(2)}<span> /dia</span></div>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button onclick="excluir(${ativo.id})" class="btn btn-delete">Excluir</button>
+                        <button onclick="editar(${ativo.id})" class="btn btn-secondary">Editar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+        } catch (err) {
+            feedback.style.display = 'block';
+            feedback.className = "alert alert-error";
+            feedback.innerText = "Erro ao conectar com o servidor.";
+        }
+    }
+
+    async function excluir(id) {
+        if (!confirm("Deseja excluir este anúncio permanentemente?")) return;
+
+        try {
+            const response = await fetch(`/ativos/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                carregarMeusAnuncios();
+            } else {
+                alert("Erro ao excluir o item.");
+            }
+        } catch (err) {
+            alert("Erro de conexão.");
+        }
+    }
+
+    carregarMeusAnuncios();
+</script>
+
+</body>
+</html>

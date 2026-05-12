@@ -1,13 +1,15 @@
 package com.locatehub.demo.model;
 
-import jakarta.persistence.Entity;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 @Entity
 public class UserLocador extends User {
     // Atributos específicos
+    @Transient
     private final List<String> meusProdutos;
     private double saldoDisponivel;
 
@@ -33,7 +35,7 @@ public class UserLocador extends User {
         this.saldoDisponivel = saldoDisponivel;
     }
 
-    // Implementação obrigatória do passo do Template Method
+    // Implementação do passo do Template Method
     @Override
     protected void carregarConfiguracoesEspecificas() {
         System.out.println("Carregando Painel de Vendas e Inventário do Locador.");
