@@ -12,6 +12,12 @@ public class UserLocador extends User {
     private double saldoDisponivel;
 
     public UserLocador() {
+        super();
+        this.meusProdutos = new ArrayList<>();
+    }
+
+    public UserLocador(String nome, String documento, String senha, String email) {
+        super(nome, email, documento, senha);
         this.meusProdutos = new ArrayList<>();
     }
 

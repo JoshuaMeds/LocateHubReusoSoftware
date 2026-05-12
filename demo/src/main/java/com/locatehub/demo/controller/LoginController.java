@@ -1,7 +1,10 @@
 package com.locatehub.demo.controller;
 
 import com.locatehub.demo.dto.LoginRequest;
+import com.locatehub.demo.dto.RegisterRequest;
 import com.locatehub.demo.model.User;
+import com.locatehub.demo.model.UserLocador;
+import com.locatehub.demo.model.UserLocatario;
 import com.locatehub.demo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -69,5 +72,42 @@ public class LoginController {
     public ResponseEntity<String> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok("Logged out");
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(
+            @RequestBody RegisterRequest request,
+            HttpSession session
+    ) {
+        System.out.println("oi");
+        Optional<User> userEmail = service.findByEmail(request.email());
+        if(userEmail.isPresent()){
+            return ResponseEntity.status(401).body("Email já cadastrado");
+        }
+        Optional<User> userDocumento = service.findByDocumento(request.documento());
+        if(userDocumento.isPresent()){
+            return ResponseEntity.status(401).body("Documento já cadastrado");
+        }
+
+        if(request.locador()){
+            service.save(
+                    new UserLocador(
+                            request.nome(),
+                            request.documento(),
+                            request.senha(),
+                            request.email()
+                    ));
+        }
+        else{
+            service.save(
+                    new UserLocatario(
+                            request.nome(),
+                            request.email(),
+                            request.documento(),
+                            request.senha()
+                    )
+            );
+        }
+        return ResponseEntity.ok("Ok");
     }
 }

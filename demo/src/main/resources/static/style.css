@@ -17,6 +17,12 @@ body {
     line-height: 1.6;
 }
 
+.register {
+    color: blue;
+    display: block;
+    text-align: center;
+}
+
 /* Container Principal */
 .container-main {
     width: 100%;

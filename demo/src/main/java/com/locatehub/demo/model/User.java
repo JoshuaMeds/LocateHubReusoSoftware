@@ -24,6 +24,17 @@ public abstract class User {
     protected Long id;
     protected String nome;
 
+    public User(String nome, String email, String documento, String senha) {
+        this.nome = nome;
+        this.email = email;
+        this.documento = documento;
+        this.senha = senha;
+    }
+
+    public User() {
+
+    }
+
     public String getSenha() {
         return senha;
     }

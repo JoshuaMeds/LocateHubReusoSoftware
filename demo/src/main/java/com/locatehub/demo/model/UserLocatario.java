@@ -11,6 +11,10 @@ public class UserLocatario extends User {
     public UserLocatario() {
     }
 
+    public UserLocatario(String nome, String email, String documento, String senha) {
+        super(nome, email, documento, senha);
+    }
+
     // Implementação obrigatória do passo do Template Method
     @Override
     protected void carregarConfiguracoesEspecificas() {
