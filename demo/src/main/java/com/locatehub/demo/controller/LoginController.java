@@ -82,7 +82,6 @@ public class LoginController {
             @RequestBody RegisterRequest request,
             HttpSession session
     ) {
-        System.out.println("oi");
         Optional<User> userEmail = service.findByEmail(request.email());
         if(userEmail.isPresent()){
             return ResponseEntity.status(401).body("Email já cadastrado");
@@ -93,23 +92,20 @@ public class LoginController {
         }
 
         if(request.locador()){
-            service.save(
-                    new UserLocador(
-                            request.nome(),
-                            request.documento(),
-                            request.senha(),
-                            request.email()
-                    ));
+            UserLocador locador = new UserLocador();
+            locador.setNome(request.nome());
+            locador.setDocumento(request.documento());
+            locador.setSenha(request.senha());
+            locador.setEmail(request.email());
+            service.save(locador);
         }
         else{
-            service.save(
-                    new UserLocatario(
-                            request.nome(),
-                            request.email(),
-                            request.documento(),
-                            request.senha()
-                    )
-            );
+            UserLocatario locatario = new UserLocatario();
+            locatario.setNome(request.nome());
+            locatario.setDocumento(request.documento());
+            locatario.setSenha(request.senha());
+            locatario.setEmail(request.email());
+            service.save(locatario);
         }
         return ResponseEntity.ok("Ok");
     }

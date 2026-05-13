@@ -22,13 +22,16 @@ public class AtivoItem extends Ativo {
     public AtivoItem() {
     }
 
-    public AtivoItem(String titulo, BigDecimal diaria, Long donoId, String descricao) {
-        super(titulo, diaria, donoId,descricao);
+    // Construtor atualizado para bater com o AtivoController
+    public AtivoItem(Long id, String titulo, BigDecimal diaria, boolean caucao, BigDecimal valorCaucao, Long donoId) {
+        super(titulo, diaria, donoId, null);
+        this.caucao = caucao;
+        this.valorCaucao = valorCaucao;
     }
 
     @Override
     protected BigDecimal calcularAdicional(int dias) {
-        return caucao ? valorCaucao : BigDecimal.ZERO;
+        return caucao && valorCaucao != null ? valorCaucao : BigDecimal.ZERO;
     }
 
     @Override

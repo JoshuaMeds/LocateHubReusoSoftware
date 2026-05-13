@@ -82,20 +82,6 @@
 </div>
 
 <script>
-    async function checkSession() {
-            const response = await fetch("/session", {
-                method: "GET",
-                credentials: "include"
-            });
-
-            if (!response.ok) {
-                window.location.href = "index.html";
-                return;
-            }
-
-            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
-        }
-
     const lista = document.getElementById("lista");
     const money = new Intl.NumberFormat("pt-BR", {
         style: "currency",
@@ -111,6 +97,18 @@
 
     function formatDate(value) {
         return new Date(`${value}T00:00:00`).toLocaleDateString("pt-BR");
+    }
+
+    async function checkSession() {
+        const response = await fetch("/session", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (!response.ok) {
+            window.location.href = "index.html";
+            return;
+        }
     }
 
     async function carregarReservas() {
@@ -138,25 +136,50 @@
             item.className = "reservation-item";
 
             const cancelButton = reserva.podeCancelar
-                ? `<button class="btn btn-secondary" type="button">Cancelar reserva</button>`
+                ? `<button class="btn btn-secondary" type="button" onclick="cancelarReserva(${reserva.id})">Cancelar reserva</button>`
                 : "";
+
+            // Lógica de Avaliação Injetada!
+            let htmlAvaliacao = "";
+            if (reserva.status === "Finalizada") {
+                htmlAvaliacao = `
+                    <button class="btn btn-secondary" style="margin-top: 10px; width: fit-content; padding: 8px 16px; font-size: 13px;" onclick="toggleAvaliacao(${reserva.id})">
+                        ★ Avaliar Reserva
+                    </button>
+
+                    <div id="form-aval-${reserva.id}" style="display:none; margin-top: 12px; padding-top: 16px; border-top: 1px dashed #cbd5e1; animation: fadeIn 0.3s ease-out;">
+                        <div class="form-group">
+                            <label>Nota (1 a 5)</label>
+                            <select id="nota-${reserva.id}" class="form-input">
+                                <option value="5">5 - Excelente</option>
+                                <option value="4">4 - Muito Bom</option>
+                                <option value="3">3 - Bom</option>
+                                <option value="2">2 - Ruim</option>
+                                <option value="1">1 - Péssimo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Comentário</label>
+                            <textarea id="comentario-${reserva.id}" class="form-input" placeholder="Conte como foi sua experiência..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="enviarAvaliacao(${reserva.id}, this)">Enviar Avaliação</button>
+                        <p id="msg-aval-${reserva.id}" class="alert" style="display:none;"></p>
+                    </div>
+                `;
+            }
 
             item.innerHTML = `
                 <div class="reservation-header">
                     <div>
                         <div class="reservation-title">${reserva.produto}</div>
-                        <div class="reservation-meta">${formatDate(reserva.dataInicio)} ate ${formatDate(reserva.dataFim)}</div>
+                        <div class="reservation-meta">${formatDate(reserva.dataInicio)} até ${formatDate(reserva.dataFim)}</div>
                     </div>
                     <span class="badge">${reserva.status}</span>
                 </div>
                 <div class="reservation-meta">${money.format(reserva.valorTotal)}</div>
                 ${cancelButton}
+                ${htmlAvaliacao}
             `;
-
-            const button = item.querySelector("button");
-            if (button) {
-                button.addEventListener("click", async () => cancelarReserva(reserva.id));
-            }
 
             lista.appendChild(item);
         });
@@ -177,19 +200,51 @@
         await carregarReservas();
     }
 
-    async function checkSession() {
-            const response = await fetch("/session", {
-                method: "GET",
-                credentials: "include"
+    // Funções de Avaliação
+    function toggleAvaliacao(id) {
+        const form = document.getElementById(`form-aval-${id}`);
+        form.style.display = form.style.display === "block" ? "none" : "block";
+    }
+
+    async function enviarAvaliacao(id, btnElement) {
+        const nota = document.getElementById(`nota-${id}`).value;
+        const comentario = document.getElementById(`comentario-${id}`).value;
+        const msgBox = document.getElementById(`msg-aval-${id}`);
+
+        btnElement.classList.add("loading");
+        btnElement.innerText = "Enviando...";
+        msgBox.style.display = "none";
+
+        try {
+            const response = await fetch(`/avaliacoes/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ nota: parseInt(nota), comentario: comentario })
             });
 
-            if (!response.ok) {
-                window.location.href = "index.html";
-                return;
+            if (response.ok) {
+                msgBox.innerText = "Avaliação enviada com sucesso!";
+                msgBox.className = "alert alert-success";
+                msgBox.style.display = "block";
+                btnElement.style.display = "none"; 
+            } else {
+                const erro = await response.text();
+                msgBox.innerText = erro;
+                msgBox.className = "alert alert-error";
+                msgBox.style.display = "block";
             }
-
-            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        } catch (err) {
+            msgBox.innerText = "Erro ao conectar com o servidor.";
+            msgBox.className = "alert alert-error";
+            msgBox.style.display = "block";
+        } finally {
+            btnElement.classList.remove("loading");
+            if (btnElement.style.display !== "none") btnElement.innerText = "Enviar Avaliação";
         }
+    }
+
+    checkSession();
     carregarReservas();
 </script>
 </body>

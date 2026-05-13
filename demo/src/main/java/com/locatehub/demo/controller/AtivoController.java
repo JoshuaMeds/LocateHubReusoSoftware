@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.locatehub.demo.dto.AtivoRequest;
 import com.locatehub.demo.dto.AtivoResumoResponse;
 import com.locatehub.demo.model.Ativo;
+import com.locatehub.demo.model.AtivoAutomovel;
+import com.locatehub.demo.model.AtivoImovel;
+import com.locatehub.demo.model.AtivoItem;
 import com.locatehub.demo.model.User;
 import com.locatehub.demo.model.UserLocador;
 import com.locatehub.demo.model.UserLocatario;
@@ -48,27 +52,31 @@ public class AtivoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody AtivoRequest ativo, HttpSession session) {
-
-
-        Optional<User> usuario = userService.findById(ativo.donoId());
+    public ResponseEntity<?> criar(@RequestBody AtivoRequest request, HttpSession session) {
+        
+        Optional<User> usuario = usuarioLogado(session);
 
         if (usuario.isEmpty() || (usuario.get() instanceof UserLocatario)) {
             return ResponseEntity.status(403).body("Apenas locadores logados podem criar ativos.");
         }
+        
+        Long donoId = usuario.get().getId();
         Ativo novoAtivo;
+        
         try {
-            if(ativo.type().equals("AUTOMOVEL")){
-                novoAtivo = new AtivoAutomovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            if(request.type().equals("AUTOMOVEL")){
+                novoAtivo = new AtivoAutomovel(null, request.titulo(), request.valorDiaria(), request.seguroDiario(), donoId);
             }
-            else if(ativo.type().equals("IMOVEL")){
-                novoAtivo = new AtivoImovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            else if(request.type().equals("IMOVEL")){
+                novoAtivo = new AtivoImovel(null, request.titulo(), request.valorDiaria(), request.taxaLimpeza(), donoId);
             }
             else{
-                novoAtivo = new AtivoItem(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+                novoAtivo = new AtivoItem(null, request.titulo(), request.valorDiaria(), request.caucao(), request.valorCaucao(), donoId);
             }
 
+            novoAtivo.setDescricao(request.descricao());
             ativoRepository.save(novoAtivo);
+            
             return ResponseEntity.status(201).body(novoAtivo);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao salvar ativo: " + e.getMessage());

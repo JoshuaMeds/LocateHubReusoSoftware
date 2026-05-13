@@ -21,7 +21,7 @@ public abstract class Ativo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
     private String titulo;
 
