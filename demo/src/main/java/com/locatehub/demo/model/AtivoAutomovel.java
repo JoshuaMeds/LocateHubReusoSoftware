@@ -14,15 +14,14 @@ import java.math.BigDecimal;
 @PrimaryKeyJoinColumn(name = "ativo_id")
 public class AtivoAutomovel extends Ativo {
 
-    @Column(name = "seguro_diario", nullable = false)
+    @Column(name = "seguro_diario")
     private BigDecimal seguroDiario;
 
     public AtivoAutomovel() {
     }
 
-    public AtivoAutomovel(Long id, String titulo, BigDecimal diaria, BigDecimal seguroDiario, Long donoId) {
-        super(id, titulo, diaria, donoId);
-        this.seguroDiario = seguroDiario;
+    public AtivoAutomovel(String titulo, BigDecimal diaria, Long donoId, String descricao) {
+        super(titulo, diaria, donoId, descricao);
     }
 
     @Override

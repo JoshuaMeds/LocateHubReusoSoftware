@@ -69,12 +69,14 @@
             btn.innerText = "Processando...";
             message.style.display = "none";
 
+            console.log(document.getElementById("userType").value)
+
             const payload = {
-                type: document.getElementById("userType").value,
-                nome: document.getElementById("nome").value,
                 email: document.getElementById("email").value,
+                senha: document.getElementById("password").value,
                 documento: document.getElementById("documento").value,
-                senha: document.getElementById("password").value
+                nome: document.getElementById("nome").value,
+                locador: document.getElementById("userType").value === "userLocador"
             };
 
             try {
@@ -88,7 +90,7 @@
                     message.innerText = "Cadastro realizado!";
                     message.className = "alert alert-success";
                     message.style.display = "block";
-                    setTimeout(() => window.location.href = "login.html", 2000);
+                    setTimeout(() => window.location.href = "/", 2000);
                 } else {
                     const errorText = await response.text();
                     message.innerText = errorText || "Erro ao cadastrar.";

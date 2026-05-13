@@ -27,7 +27,6 @@ public class UserService {
     public Optional<User> findByEmail(String email){
         return repository.findByEmail(email);
     }
-    
     public Optional<User> findById(long id){
         return repository.findById(id);
     }

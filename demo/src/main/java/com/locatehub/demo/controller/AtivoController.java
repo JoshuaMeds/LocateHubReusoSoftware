@@ -48,19 +48,27 @@ public class AtivoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody Ativo ativo, HttpSession session) {
-        Optional<User> usuario = usuarioLogado(session);
+    public ResponseEntity<?> criar(@RequestBody AtivoRequest ativo, HttpSession session) {
 
-        if (usuario.isEmpty() || !(usuario.get() instanceof UserLocador)) {
+
+        Optional<User> usuario = userService.findById(ativo.donoId());
+
+        if (usuario.isEmpty() || (usuario.get() instanceof UserLocatario)) {
             return ResponseEntity.status(403).body("Apenas locadores logados podem criar ativos.");
         }
-
+        Ativo novoAtivo;
         try {
-            java.lang.reflect.Field field = Ativo.class.getDeclaredField("donoId");
-            field.setAccessible(true);
-            field.set(ativo, usuario.get().getId());
+            if(ativo.type().equals("AUTOMOVEL")){
+                novoAtivo = new AtivoAutomovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
+            else if(ativo.type().equals("IMOVEL")){
+                novoAtivo = new AtivoImovel(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
+            else{
+                novoAtivo = new AtivoItem(ativo.titulo(),ativo.valorDiaria(), ativo.donoId(), ativo.descricao());
+            }
 
-            Ativo novoAtivo = ativoRepository.save(ativo);
+            ativoRepository.save(novoAtivo);
             return ResponseEntity.status(201).body(novoAtivo);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Erro ao salvar ativo: " + e.getMessage());
@@ -73,18 +81,24 @@ public class AtivoController {
             HttpSession session
     ) {
         String tipoNormalizado = tipo == null ? null : tipo.toUpperCase(Locale.ROOT);
-        Optional<Long> locatarioId = usuarioLogado(session)
-                .filter(UserLocatario.class::isInstance)
-                .map(User::getId);
+        Optional<User> usuario = usuarioLogado(session);
+        Optional<Long> locatarioId = usuario.filter(UserLocatario.class::isInstance).map(User::getId);
+        Optional<Long> locadorId = usuario.filter(UserLocador.class::isInstance).map(User::getId);
 
-        List<AtivoResumoResponse> ativos = ativoRepository.findAll()
+        List<Ativo> ativosBase = locadorId
+                .map(ativoRepository::findByDonoId)
+                .orElseGet(ativoRepository::findAll);
+
+        List<AtivoResumoResponse> ativos = ativosBase
                 .stream()
+                .filter(ativo -> locatarioId.isEmpty() || ativo.isDisponivel())
                 .filter(ativo -> tipoNormalizado == null || AtivoResumoResponse.tipoCodigo(ativo).equals(tipoNormalizado))
                 .map(ativo -> AtivoResumoResponse.from(
                         ativo,
                         locatarioId
                                 .map(id -> listaDesejosRepository.existsByLocatario_IdAndAtivo_Id(id, ativo.getId()))
-                                .orElse(false)
+                                .orElse(false),
+                        locatarioId.isPresent()
                 ))
                 .toList();
 
@@ -188,23 +202,7 @@ public class AtivoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> excluir(@PathVariable Long id, HttpSession session) {
-        Optional<User> usuario = usuarioLogado(session);
-        if (usuario.isEmpty() || !(usuario.get() instanceof UserLocador)) {
-            return ResponseEntity.status(403).body("Apenas locadores podem excluir ativos.");
-        }
-
-        Optional<Ativo> ativoOptional = ativoRepository.findById(id);
-        if (ativoOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Ativo ativo = ativoOptional.get();
-        if (!ativo.podeSerGerenciadoPor(usuario.get().getId())) {
-            return ResponseEntity.status(403).body("Você só pode excluir ativos criados por você.");
-        }
-
-        ativoRepository.delete(ativo);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(403).body("Ativos nao podem ser excluidos.");
     }
 
     private Optional<User> usuarioLogado(HttpSession session) {

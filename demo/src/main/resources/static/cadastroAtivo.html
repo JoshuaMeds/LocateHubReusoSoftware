@@ -43,37 +43,6 @@
                     <input type="number" id="valorDiaria" step="0.01" required>
                 </div>
             </div>
-
-            <div id="dynamicContainer" style="display: none; margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
-                
-                <div id="fields-AUTOMOVEL" class="type-fields" style="display: none;">
-                    <div class="form-group">
-                        <label>Seguro Diário</label>
-                        <div class="input-group-price"><span>R$</span><input type="number" id="seguroDiario" step="0.01"></div>
-                    </div>
-                </div>
-
-                <div id="fields-IMOVEL" class="type-fields" style="display: none;">
-                    <div class="form-group">
-                        <label>Taxa de Limpeza</label>
-                        <div class="input-group-price"><span>R$</span><input type="number" id="taxaLimpeza" step="0.01"></div>
-                    </div>
-                </div>
-
-                <div id="fields-ITEM" class="type-fields" style="display: none;">
-                    <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
-                        <input type="checkbox" id="exigirCaucao" style="width: auto;">
-                        <label style="margin-bottom: 0;">Exigir Caução?</label>
-                    </div>
-                    <div id="caucaoGroup" style="display: none;">
-                        <div class="form-group">
-                            <label>Valor do Caução</label>
-                            <div class="input-group-price"><span>R$</span><input type="number" id="valorCaucao" step="0.01"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <button type="submit" class="btn btn-primary" id="btnSubmit" style="margin-top: 20px;">Publicar Anúncio</button>
         </form>
 
@@ -82,6 +51,22 @@
 </div>
 
 <script>
+    let userId;
+    async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            const data = await response.json();
+            userId = data;
+        }
+
     const tipoSelect = document.getElementById('tipoAtivo');
     const dynamicContainer = document.getElementById('dynamicContainer');
     const typeFields = document.querySelectorAll('.type-fields');
@@ -93,11 +78,6 @@
         dynamicContainer.style.display = 'block';
         typeFields.forEach(f => f.style.display = 'none');
         document.getElementById(`fields-${e.target.value}`).style.display = 'block';
-    });
-
-    // Toggle do campo de valor de caução
-    exigirCaucao.addEventListener('change', (e) => {
-        caucaoGroup.style.display = e.target.checked ? 'block' : 'none';
     });
 
     document.getElementById('ativoForm').addEventListener('submit', async (e) => {
@@ -113,17 +93,12 @@
         const payload = {
             type: tipo, // Necessário para o Jackson no Java instanciar a classe certa
             titulo: document.getElementById('titulo').value,
+            valorDiaria: parseFloat(document.getElementById('valorDiaria').value),
+            donoId: userId,
             descricao: document.getElementById('descricao').value,
-            valorDiaria: parseFloat(document.getElementById('valorDiaria').value)
         };
 
         // Adiciona atributos específicos
-        if (tipo === 'AUTOMOVEL') payload.seguroDiario = parseFloat(document.getElementById('seguroDiario').value || 0);
-        if (tipo === 'IMOVEL') payload.taxaLimpeza = parseFloat(document.getElementById('taxaLimpeza').value || 0);
-        if (tipo === 'ITEM') {
-            payload.caucao = exigirCaucao.checked;
-            payload.valorCaucao = exigirCaucao.checked ? parseFloat(document.getElementById('valorCaucao').value || 0) : 0;
-        }
 
         try {
             const response = await fetch('/ativos', {
@@ -144,13 +119,13 @@
                 feedback.innerText = "Erro: " + erro;
             }
         } catch (err) {
-            feedback.className = "alert alert-error";
-            feedback.innerText = "Erro de conexão com o servidor.";
         } finally {
             btn.innerText = "Publicar Anúncio";
             btn.disabled = false;
         }
     });
+
+    checkSession();
 </script>
 </body>
 </html>
