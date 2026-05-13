@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Locatário - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container-dashboard">
+    <header class="dashboard-header">
+        <div>
+            <h1>Meu Dashboard Financeiro</h1>
+            <p id="subtitulo">Carregando seu resumo...</p>
+        </div>
+        <a href="home.html" class="btn btn-secondary btn-add">Voltar</a>
+    </header>
+
+    <div id="conteudo" style="display:none;">
+
+        <h2 style="margin: 0 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Visão Geral dos Gastos</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Gasto Total</span>
+                    <h2 id="totalGasto">R$ 0,00</h2>
+                    <p>Soma de todas as reservas confirmadas (não canceladas).</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Mês Atual</span>
+                    <h2 id="gastoMes">R$ 0,00</h2>
+                    <p>Quanto você gastou em reservas neste mês.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-automovel">Total de Reservas</span>
+                    <h2 id="totalReservas">0</h2>
+                    <p>Quantas reservas você já fez ao todo.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 style="margin: 30px 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Detalhamento por Status</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Em Andamento</span>
+                    <h2 id="reservasAtivas">0</h2>
+                    <p>Reservas com data atual entre início e fim.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Finalizadas</span>
+                    <h2 id="reservasFinalizadas">0</h2>
+                    <p>Reservas com data de fim já passada.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-automovel">Canceladas</span>
+                    <h2 id="reservasCanceladas">0</h2>
+                    <p>Reservas que você cancelou antes da data de início.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 style="margin: 30px 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Métodos de Pagamento</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Histórico</span>
+                    <h2 style="font-size: 1rem;">Cartão de Crédito e PIX</h2>
+                    <p>Métodos utilizados recentemente em suas reservas.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Cartão Salvo</span>
+                    <h2 style="font-size: 1rem;">**** **** **** 1234</h2>
+                    <p>Cartão principal vinculado à sua conta.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="erro" class="alert alert-error" style="display:none; margin-top: 20px;"></div>
+</div>
+
+<script>
+    async function carregarDashboard() {
+        try {
+            const response = await fetch('/dashboard/locatario', { credentials: 'include' });
+
+            if (response.status === 403) {
+                const erro = document.getElementById('erro');
+                erro.innerHTML = 'Acesso negado: apenas <strong>locatários</strong> podem ver este dashboard. <a href="home.html" style="color:#991b1b;font-weight:700;">Voltar ao menu</a>';
+                erro.style.display = 'block';
+                return;
+            }
+
+            if (!response.ok) throw new Error('Falha ao carregar dashboard (' + response.status + ')');
+
+            const data = await response.json();
+
+            const fmtMoeda = v => 'R$ ' + Number(v).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('subtitulo').textContent =
+                'Olá, ' + data.nome + ' (' + data.email + ')';
+            document.getElementById('totalGasto').textContent = fmtMoeda(data.totalGasto);
+            document.getElementById('gastoMes').textContent = fmtMoeda(data.gastoMesAtual);
+            document.getElementById('totalReservas').textContent = data.totalReservas;
+            document.getElementById('reservasAtivas').textContent = data.reservasEmAndamento;
+            document.getElementById('reservasFinalizadas').textContent = data.reservasFinalizadas;
+            document.getElementById('reservasCanceladas').textContent = data.reservasCanceladas;
+
+            document.getElementById('conteudo').style.display = 'block';
+
+        } catch (e) {
+            const erro = document.getElementById('erro');
+            erro.textContent = 'Erro ao carregar dashboard: ' + e.message;
+            erro.style.display = 'block';
+        }
+    }
+
+    carregarDashboard();
+</script>
+
+</body>
+</html>

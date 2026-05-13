@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container-main">
+        <div class="card">
+            <div class="page-header">
+                <h1>Página Inicial</h1>
+                <p id="welcome">Carregando...</p>
+            </div>
+
+            <div class="alert alert-success">
+                Sessão verificada com sucesso.
+            </div>
+
+            <button onclick="window.location.href='ativos.html'" class="btn btn-primary" style="margin-top: 20px;">
+                Ver Ativos
+            </button>
+
+            <button onclick="window.location.href='listaDesejos.html'" class="btn btn-secondary">
+                Lista de Desejos
+            </button>
+
+            <button onclick="window.location.href='minhasReservas.html'" class="btn btn-secondary">
+                Minhas Reservas
+            </button>
+
+            <button onclick="window.location.href='cadastroAtivo.html'" class="btn btn-secondary">
+                Cadastrar Ativo
+            </button>
+
+            <button onclick="window.location.href='dashboardLocatario.html'" class="btn btn-secondary">
+                Dashboard Financeiro (Locatário)
+            </button>
+
+            <button onclick="window.location.href='dashboardLocador.html'" class="btn btn-secondary">
+                Dashboard Financeiro (Locador)
+            </button>
+
+            <button onclick="window.location.href='historico.html'" class="btn btn-secondary">
+                Histórico de Aluguéis
+            </button>
+
+            <button onclick="logout()" class="btn btn-secondary" style="margin-top: 20px;">
+                Sair da Conta
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function checkSession() {
+            const response = await fetch("/session", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("welcome").innerText = "Bem-vindo ao LocateHub";
+        }
+
+        async function logout() {
+            await fetch("/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+
+            window.location.href = "/";
+        }
+
+        checkSession();
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+/* Padrão Visual Universal - LocateHub */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Container Principal */
+.container-main {
+    width: 100%;
+    max-width: 450px;
+}
+
+/* Cartão Blanco Central */
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+}
+
+/* Cabeçalho */
+.page-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Grupos de Formulário */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+/* Inputs, Selects e Textareas */
+.form-input, 
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    background-color: white;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+    border-color: #6366F1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Grupo de Preço com Prefixo R$ */
+.input-group-price {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-group-price span {
+    position: absolute;
+    left: 12px;
+    color: #64748b;
+    font-weight: 600;
+    z-index: 1;
+}
+
+.input-group-price input {
+    padding-left: 40px;
+}
+
+/* Botões */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: #6366F1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Estado de Loading */
+.btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Alertas */
+.alert {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+.alert-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+.dynamic-fields {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.type-fields small {
+    display: block;
+    color: #64748b;
+    font-size: 11px;
+    margin-top: 4px;
+}
+/* Layout do Dashboard */
+.container-dashboard {
+    width: 100%;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    color: #1e293b;
+    font-size: 24px;
+}
+
+.btn-add {
+    width: auto !important;
+    padding: 12px 24px !important;
+}
+
+/* Grid de Cards */
+.grid-meus-ativos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.ativo-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ativo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Tipografia e Tags no Card */
+.tag-tipo {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.tag-automovel { background: #e0e7ff; color: #4338ca; }
+.tag-imovel { background: #fef3c7; color: #92400e; }
+.tag-item { background: #d1fae5; color: #065f46; }
+
+.ativo-card h2 {
+    font-size: 18px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.ativo-card p {
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.preco {
+    font-size: 20px;
+    font-weight: 700;
+    color: #6366F1;
+    margin: 15px 0;
+}
+
+.preco span {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* Ações */
+.card-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 15px;
+}
+
+.btn-delete {
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+}
+
+.btn-delete:hover {
+    background: #fecaca !important;
+}
+
+/* Estados Vazios */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px;
+    background: #f8fafc;
+    border-radius: 16px;
+    border: 2px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.loading-state {
+    text-align: center;
+    grid-column: 1 / -1;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+/* =========================================
+   FORMATAÇÃO DE DESCRIÇÕES (TEXTOS LONGOS)
+   ========================================= */
+
+/* 1. Na tela de Detalhes do Ativo: Mantém os parágrafos e "Enters" que o usuário digitou */
+.page-header p#descricao {
+    white-space: pre-wrap;
+    text-align: left; /* Melhora a leitura de textos longos */
+    margin-top: 15px;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* 2. Nos Cards de Catálogo (ativos.html e meusAnuncios.html): Limita o texto a 3 linhas com "..." */
+.asset-meta, .ativo-card p {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Número máximo de linhas antes de cortar */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word; /* Impede que uma palavra gigante quebre a tela */
+}
