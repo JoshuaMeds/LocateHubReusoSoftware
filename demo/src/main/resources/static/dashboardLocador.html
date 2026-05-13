@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Locador - LocateHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container-dashboard">
+    <header class="dashboard-header">
+        <div>
+            <h1>Dashboard do Locador</h1>
+            <p id="subtitulo">Carregando seu resumo...</p>
+        </div>
+        <a href="home.html" class="btn btn-secondary btn-add">Voltar</a>
+    </header>
+
+    <div id="conteudo" style="display:none;">
+
+        <h2 style="margin: 0 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Extrato de Receitas</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Receita Realizada</span>
+                    <h2 id="receitaRealizada">R$ 0,00</h2>
+                    <p>Total faturado em reservas já concluídas.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Receita Projetada</span>
+                    <h2 id="receitaProjetada">R$ 0,00</h2>
+                    <p>Reservas confirmadas em andamento e futuras.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 style="margin: 30px 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Meus Ativos</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-automovel">Total Cadastrados</span>
+                    <h2 id="totalAtivos">0</h2>
+                    <p>Todos os ativos que você cadastrou na plataforma.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Disponíveis Agora</span>
+                    <h2 id="ativosDisponiveis">0</h2>
+                    <p>Ativos com status disponível para locação.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 style="margin: 30px 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Reservas Recebidas</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Total Recebidas</span>
+                    <h2 id="totalReservasRecebidas">0</h2>
+                    <p>Quantas reservas seus ativos já receberam no total.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-automovel">Em Andamento</span>
+                    <h2 id="reservasAndamento">0</h2>
+                    <p>Reservas atualmente ativas em seus ativos.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 style="margin: 30px 0 15px; color: #1e293b; font-size: 1rem; font-weight: 700;">Configuração de Recebimento</h2>
+        <div class="grid-meus-ativos">
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-imovel">Chave PIX</span>
+                    <h2 style="font-size: 1rem;">email@locatehub.com.br</h2>
+                    <p>Chave PIX cadastrada para repasse automático dos seus ganhos.</p>
+                </div>
+            </div>
+
+            <div class="ativo-card">
+                <div class="card-content">
+                    <span class="tag-tipo tag-item">Repasse Automático</span>
+                    <h2 style="font-size: 1rem; color: #166534;">Ativo</h2>
+                    <p>Repasse configurado e ativo para suas reservas concluídas.</p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="erro" class="alert alert-error" style="display:none; margin-top: 20px;"></div>
+</div>
+
+<script>
+    async function carregarDashboard() {
+        try {
+            const response = await fetch('/dashboard/locador', { credentials: 'include' });
+
+            if (response.status === 403) {
+                const erro = document.getElementById('erro');
+                erro.innerHTML = 'Acesso negado: apenas <strong>locadores</strong> podem ver este dashboard. <a href="home.html" style="color:#991b1b;font-weight:700;">Voltar ao menu</a>';
+                erro.style.display = 'block';
+                return;
+            }
+
+            if (!response.ok) throw new Error('Falha ao carregar dashboard (' + response.status + ')');
+
+            const data = await response.json();
+
+            const fmtMoeda = v => 'R$ ' + Number(v).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            document.getElementById('subtitulo').textContent =
+                'Olá, ' + data.nome + ' (' + data.email + ')';
+            document.getElementById('receitaRealizada').textContent = fmtMoeda(data.receitaRealizada);
+            document.getElementById('receitaProjetada').textContent = fmtMoeda(data.receitaProjetada);
+            document.getElementById('totalAtivos').textContent = data.totalAtivosCadastrados;
+            document.getElementById('ativosDisponiveis').textContent = data.ativosDisponiveis;
+            document.getElementById('totalReservasRecebidas').textContent = data.totalReservasRecebidas;
+            document.getElementById('reservasAndamento').textContent = data.reservasEmAndamento;
+
+            document.getElementById('conteudo').style.display = 'block';
+
+        } catch (e) {
+            const erro = document.getElementById('erro');
+            erro.textContent = 'Erro ao carregar dashboard: ' + e.message;
+            erro.style.display = 'block';
+        }
+    }
+
+    carregarDashboard();
+</script>
+
+</body>
+</html>
